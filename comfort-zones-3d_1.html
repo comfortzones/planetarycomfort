@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comfort Zones — 3D World Ecology</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<style>
+:root {
+  --bg: #05080f;
+  --panel: rgba(5,8,15,0.96);
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #d6d1c4;
+  --muted: #5a6478;
+  --dim: #2d3545;
+
+  --extraction_manufacturing: #f97316;
+  --food:                     #fbbf24;
+  --humanitarian:             #34d399;
+  --alternatives:             #e879f9;
+  --data:                     #2dd4bf;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { width:100%; height:100%; overflow:hidden; background:var(--bg); font-family:'DM Sans',sans-serif; color:var(--text); }
+
+#app { display:flex; width:100vw; height:100vh; }
+
+/* ── LEFT PANEL ── */
+#panel {
+  width:290px;
+  flex-shrink:0;
+  background:var(--panel);
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  z-index:20;
+  backdrop-filter:blur(20px);
+}
+
+#panel-head {
+  padding:22px 20px 16px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.p-eyebrow {
+  font-family:'Space Mono',monospace;
+  font-size:9px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--data);
+  margin-bottom:9px;
+  display:flex;align-items:center;gap:8px;
+}
+.p-eyebrow::before{content:'';display:block;width:18px;height:1px;background:var(--data);}
+#panel-head h1 {
+  font-family:'Cormorant Garamond',serif;
+  font-size:20px;
+  font-weight:600;
+  line-height:1.22;
+  color:var(--text);
+  margin-bottom:5px;
+}
+#panel-head h1 em { font-style:italic; color:var(--food); }
+.p-authors { font-family:'Space Mono',monospace; font-size:9px; color:var(--muted); }
+
+#back-btn {
+  display:none;
+  align-items:center;
+  gap:6px;
+  padding:8px 20px;
+  background:transparent;
+  border:none;
+  border-bottom:1px solid var(--border);
+  cursor:pointer;
+  color:var(--muted);
+  font-family:'Space Mono',monospace;
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  width:100%;
+  transition:color .15s;
+  flex-shrink:0;
+}
+#back-btn:hover{color:var(--text);}
+
+#controls {
+  padding:14px 18px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+  overflow-y:auto;
+  max-height:260px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--border) transparent;
+}
+
+.ctrl-section {
+  font-family:'Space Mono',monospace;
+  font-size:8px;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  color:var(--dim);
+  margin:10px 0 7px;
+}
+.ctrl-section:first-child{margin-top:0;}
+
+.layer-btn,.flow-btn {
+  display:flex;align-items:center;gap:7px;
+  width:100%;padding:4px 7px;
+  background:transparent;border:1px solid transparent;
+  border-radius:2px;cursor:pointer;
+  color:var(--muted);font-family:'DM Sans',sans-serif;font-size:11px;
+  text-align:left;transition:all .15s;margin-bottom:2px;
+}
+.layer-btn:hover,.flow-btn:hover{background:rgba(255,255,255,0.04);color:var(--text);}
+.layer-btn.active,.flow-btn.active{border-color:var(--border2);background:rgba(255,255,255,0.04);color:var(--text);}
+.swatch{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.check{margin-left:auto;width:11px;height:11px;border:1px solid var(--border2);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:8px;color:transparent;transition:all .15s;}
+.active .check{color:var(--text);background:rgba(255,255,255,0.08);}
+.flow-line{width:20px;height:2px;flex-shrink:0;border-radius:1px;}
+
+#info-panel {
+  flex:1;overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:var(--border) transparent;
+}
+#info-panel::-webkit-scrollbar{width:3px;}
+#info-panel::-webkit-scrollbar-thumb{background:var(--border);}
+
+#info-default {
+  padding:20px 18px;
+  font-family:'Space Mono',monospace;
+  font-size:9px;
+  line-height:1.9;
+  color:var(--dim);
+  text-align:center;
+  margin-top:10px;
+}
+#info-default em{color:var(--muted);font-style:italic;}
+
+#info-site { display:none; padding:18px; }
+.si-type{font-family:'Space Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:.13em;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.si-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.si-name{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:600;line-height:1.2;color:var(--text);margin-bottom:4px;}
+.si-loc{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:12px;}
+.si-claim{font-size:12px;line-height:1.75;color:#8d98aa;border-left:2px solid;padding-left:11px;margin-bottom:12px;}
+.si-quote{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:#7a8699;line-height:1.6;margin-bottom:12px;}
+.theory-tag{display:inline-block;font-family:'Space Mono',monospace;font-size:7px;text-transform:uppercase;letter-spacing:.07em;padding:2px 6px;border-radius:2px;margin:2px;border:1px solid;}
+.refs-label{font-family:'Space Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:7px;margin-top:12px;border-top:1px solid var(--border);padding-top:10px;}
+.ref-item{margin-bottom:9px;}
+.ref-item a{font-family:'Space Mono',monospace;font-size:9px;color:var(--data);text-decoration:none;transition:color .15s;display:block;}
+.ref-item a:hover{color:#fff;}
+.ref-item span{font-size:10px;color:var(--muted);line-height:1.4;display:block;margin-top:2px;}
+
+/* ── CANVAS ── */
+#canvas-wrap {
+  flex:1;position:relative;overflow:hidden;
+  background: radial-gradient(ellipse at 50% 60%, #0a1020 0%, #05080f 70%);
+}
+#three-canvas { display:block; width:100%; height:100%; }
+
+/* ── HUD ── */
+#hud-title {
+  position:absolute;top:20px;left:24px;
+  font-family:'Space Mono',monospace;font-size:9px;
+  color:rgba(255,255,255,0.2);letter-spacing:.08em;
+  pointer-events:none;
+}
+
+#tooltip-3d {
+  position:absolute;
+  background:rgba(5,8,15,0.9);
+  border:1px solid var(--border2);
+  padding:10px 14px;max-width:200px;
+  pointer-events:none;opacity:0;
+  transition:opacity .12s;border-radius:2px;z-index:30;
+}
+#tooltip-3d.vis{opacity:1;}
+.tt-type{font-family:'Space Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px;}
+.tt-name{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;color:var(--text);}
+.tt-hint{font-family:'Space Mono',monospace;font-size:8px;color:var(--dim);margin-top:3px;}
+
+#instructions {
+  position:absolute;bottom:18px;left:50%;transform:translateX(-50%);
+  font-family:'Space Mono',monospace;font-size:9px;
+  color:rgba(255,255,255,0.18);letter-spacing:.07em;
+  pointer-events:none;white-space:nowrap;
+  background:rgba(5,8,15,0.6);padding:5px 14px;border-radius:2px;
+}
+
+/* ── LEGEND ── */
+#legend {
+  position:absolute;top:16px;right:16px;
+  background:rgba(5,8,15,0.85);
+  border:1px solid var(--border);
+  padding:12px 14px;min-width:150px;
+  backdrop-filter:blur(10px);
+}
+.leg-title{font-family:'Space Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin-bottom:8px;}
+.leg-item{display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:10px;color:var(--muted);}
+.leg-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.leg-sep{border-top:1px solid var(--border);margin:7px 0;}
+
+/* ── TEMPERATURE LAYER ── */
+#temp-layer {
+  position:absolute;
+  bottom:0; left:0; right:0;
+  background:rgba(5,8,15,0.92);
+  border-top:1px solid var(--border2);
+  backdrop-filter:blur(16px);
+  z-index:25;
+  padding:14px 24px 16px;
+  transition: transform .4s ease, opacity .4s ease;
+}
+#temp-layer.hidden { transform:translateY(100%); opacity:0; pointer-events:none; }
+
+#temp-header {
+  display:flex;align-items:center;gap:12px;margin-bottom:10px;
+}
+#temp-eyebrow {
+  font-family:'Space Mono',monospace;font-size:8px;text-transform:uppercase;
+  letter-spacing:.14em;color:var(--data);display:flex;align-items:center;gap:6px;
+}
+#temp-eyebrow::before{content:'';display:block;width:14px;height:1px;background:var(--data);}
+#temp-current-val {
+  font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;
+  margin-left:auto;letter-spacing:-.01em;
+  transition:color .4s;
+}
+#temp-year-label {
+  font-family:'Space Mono',monospace;font-size:18px;color:var(--text);font-weight:700;
+  min-width:52px;text-align:right;
+}
+#temp-desc {
+  font-size:10px;color:var(--muted);font-family:'DM Sans',sans-serif;
+  max-width:380px;line-height:1.5;
+}
+
+#temp-chart-row {
+  display:flex;align-items:center;gap:12px;margin-bottom:10px;
+}
+#temp-sparkline {
+  flex:1;height:52px;cursor:crosshair;position:relative;
+}
+#temp-source {
+  font-family:'Space Mono',monospace;font-size:7px;color:var(--dim);
+  text-align:right;margin-top:4px;
+  letter-spacing:.06em;
+}
+
+#temp-slider-row {
+  display:flex;align-items:center;gap:10px;
+}
+#temp-slider-row label {
+  font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);
+  white-space:nowrap;
+}
+#temp-slider {
+  flex:1;
+  -webkit-appearance:none;appearance:none;
+  height:2px;background:var(--border2);outline:none;cursor:pointer;
+  border-radius:1px;
+}
+#temp-slider::-webkit-slider-thumb {
+  -webkit-appearance:none;appearance:none;
+  width:14px;height:14px;border-radius:50%;
+  background:var(--data);cursor:pointer;
+  box-shadow:0 0 8px var(--data);
+  border:2px solid #05080f;
+  transition:background .3s;
+}
+#temp-toggle-btn {
+  position:absolute;
+  bottom:0; right:20px;
+  font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);background:rgba(5,8,15,0.9);
+  border:1px solid var(--border2);border-bottom:none;
+  padding:5px 12px;cursor:pointer;
+  transition:color .15s,border-color .15s;
+  z-index:26;
+}
+#temp-toggle-btn:hover{color:var(--data);border-color:var(--data);}
+#temp-toggle-btn.active{color:var(--data);}
+
+/* Globe atmosphere tint overlay */
+#atmo-overlay {
+  position:absolute;inset:0;pointer-events:none;z-index:5;
+  border-radius:50%;
+  /* controlled by JS */
+  background:radial-gradient(ellipse at 50% 50%, transparent 40%, transparent 100%);
+  transition:background .8s;
+}
+
+/* Loading */
+#loading {
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:var(--bg);z-index:100;flex-direction:column;gap:16px;
+  transition:opacity .6s;
+}
+#loading.done{opacity:0;pointer-events:none;}
+.load-spinner {
+  width:40px;height:40px;border:1px solid var(--border);border-top-color:var(--data);
+  border-radius:50%;animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.load-text{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.1em;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- PANEL -->
+  <div id="panel">
+    <div id="panel-head">
+      <div class="p-eyebrow">Economy &amp; Society · 2026</div>
+      <h1>Comfort <em>Zones</em><br>3D World Ecology<br>of Thermal Capital</h1>
+      <div class="p-authors">Cross &amp; Nading</div>
+    </div>
+
+    <button id="back-btn" onclick="clearSite()">← All Sites</button>
+
+    <div id="controls">
+      <div class="ctrl-section">Zone Types</div>
+      <div id="zone-toggles"></div>
+      <div class="ctrl-section">Flows</div>
+      <div id="flow-toggles"></div>
+      <div class="ctrl-section">Theory Layers</div>
+      <div id="theory-toggles"></div>
+    </div>
+
+    <div id="info-panel">
+      <div id="info-default">
+        Drag to rotate globe<br>
+        Scroll to zoom<br><br>
+        Click a glowing node<br>to explore field sites,<br>claims &amp; references<br><br>
+        ──────────────<br><br>
+        <em>"The global economy<br>as a network of<br>microclimatic zones"</em><br><br>
+        Cross &amp; Nading 2026
+      </div>
+      <div id="info-site"></div>
+    </div>
+  </div>
+
+  <!-- 3D CANVAS -->
+  <div id="canvas-wrap">
+    <canvas id="three-canvas"></canvas>
+    <div id="hud-title">COMFORT ZONES · WORLD ECOLOGY · INTERACTIVE 3D MAP</div>
+    <div id="tooltip-3d">
+      <div class="tt-type" id="tt3-type"></div>
+      <div class="tt-name" id="tt3-name"></div>
+      <div class="tt-hint">Click to explore</div>
+    </div>
+    <div id="instructions">Drag · Rotate &nbsp;|&nbsp; Scroll · Zoom &nbsp;|&nbsp; Click node · Explore &nbsp;|&nbsp; 🌡 Temperature · Timeline</div>
+    <div id="legend">
+      <div class="leg-title">Site Types</div>
+      <div id="leg-zones"></div>
+      <div class="leg-sep"></div>
+      <div class="leg-title">Flows</div>
+      <div id="leg-flows"></div>
+    </div>
+    <!-- TEMPERATURE LAYER -->
+    <button id="temp-toggle-btn" onclick="toggleTempLayer()">🌡 Temperature</button>
+    <div id="temp-layer" class="hidden">
+      <div id="temp-header">
+        <div>
+          <div id="temp-eyebrow">Global Temperature Anomaly</div>
+          <div id="temp-desc">Warming relative to 1880–1900 baseline · NASA GISTEMP</div>
+        </div>
+        <div id="temp-year-label">—</div>
+        <div id="temp-current-val">—</div>
+      </div>
+      <div id="temp-chart-row">
+        <canvas id="temp-sparkline" height="52"></canvas>
+      </div>
+      <div id="temp-slider-row">
+        <label>1880</label>
+        <input type="range" id="temp-slider" min="1880" max="2024" value="2024" step="1">
+        <label>2024</label>
+      </div>
+      <div id="temp-source">Data: NASA GISTEMP via global-warming.org · Source: climatechangetracker.org/global-warming</div>
+    </div>
+
+    <div id="loading">
+      <div class="load-spinner"></div>
+      <div class="load-text">Building world ecology…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════
+
+const ZONE_TYPES = [
+  { id:'data',                    label:'Data & Digital Economy',      color:'#2dd4bf' },
+  { id:'food',                    label:'Food & Agricultural',         color:'#fbbf24' },
+  { id:'humanitarian',            label:'Humanitarian',                color:'#34d399' },
+  { id:'extraction_manufacturing',label:'Extraction & Manufacturing',  color:'#f97316' },
+  { id:'alternatives',            label:'Experimental Alternatives',   color:'#e879f9' },
+];
+
+const FLOW_TYPES = [
+  { id:'capital',    label:'Capital flows',     color:'#fbbf24' },
+  { id:'migration',  label:'Migration routes',  color:'#38bdf8' },
+  { id:'food',       label:'Food & cold chain', color:'#f97316' },
+  { id:'fuel',       label:'Fuel & resources',  color:'#ef4444' },
+  { id:'data_flow',  label:'Data flows',        color:'#2dd4bf' },
+];
+
+const THEORY_LAYERS = [
+  { id:'feminist',   label:'Feminist Theory',  color:'#e879f9' },
+  { id:'colonial',   label:'Colonial History', color:'#fbbf24' },
+  { id:'neoliberal', label:'Neoliberalism',    color:'#f87171' },
+  { id:'ecology',    label:'World Ecology',    color:'#34d399' },
+];
+
+// lat/lon: [longitude, latitude] like geojson
+const SITES = [
+  { id:'oil_westafrica',  name:'Offshore Oil Platforms', location:'West Africa',        type:'extraction_manufacturing', ll:[4.0,3.5],
+    claim:'Break rooms counterpoint industrial drudgery while thermal systems keep machinery running. Comfort zones function as adjuncts to sacrifice zones.',
+    quote:'Expatriate oil executives in Equatorial Guinea expect climate-controlled housing — even grand pianos.',
+    theories:['colonial','ecology'],
+    refs:[{ a:'Destrée 2023', t:"'We work for the Devil': Oil extraction on the offshore frontier", u:'https://journals.sagepub.com/doi/10.1177/0308275X221133264' },{ a:'Appel 2019', t:'The Licit Life of Capitalism', u:'https://www.dukeupress.edu/the-licit-life-of-capitalism' }]},
+  { id:'cobalt_drc',      name:'Artisanal Cobalt Mining', location:'DR Congo',           type:'extraction_manufacturing', ll:[26.5,-2.5],
+    claim:'Artisanal miners extracting cobalt for global batteries lack ILO-standard thermal protection. Expatriate managers operate from climate-controlled compounds.',
+    quote:'Comfort zones materialize a deep unevenness.',
+    theories:['colonial','ecology'],
+    refs:[{ a:'Calvão et al. 2021', t:'Cobalt mining and corporate outsourcing in the DRC', u:'https://www.sciencedirect.com/science/article/pii/S2214790X21003148' }]},
+  { id:'niger_delta',     name:'Informal Oil Refining',   location:'Niger Delta, Nigeria', type:'extraction_manufacturing', ll:[6.0,5.0],
+    claim:'Informal oil refiners in the Niger Delta lack access to ILO-standard safety gear — their discomfort fuels a global economy of thermally optimised data centres and homes.',
+    quote:'Comfort zones function as adjuncts to sacrifice zones.',
+    theories:['colonial','ecology'],
+    refs:[{ a:'Adunbi 2020', t:'Crafting Spaces of Value: Infrastructure and contested oil in Nigeria', u:'#' },{ a:'Hecht 2023', t:'Residual Governance', u:'https://www.dukeupress.edu/residual-governance' }]},
+  { id:'iraq_fob',        name:'Forward Operating Bases', location:'Iraq',               type:'extraction_manufacturing', ll:[44.0,33.0],
+    claim:'US Army FOBs replicated domestic comforts while burning 250 tonnes of waste daily, causing cancers among US personnel and Iraqi civilians.',
+    quote:'Comfort zones offer degrees of protection within sacrifice zones, though always unequally.',
+    theories:['colonial','neoliberal'],
+    refs:[{ a:'MacLeish & Wool 2022', t:'Burn Pits: US Military Waste as War Violence', u:'https://culanth.org/fieldsights/burn-pits-us-military-waste-as-war-violence' }]},
+  { id:'sez_india',       name:'Special Economic Zones',  location:'India',              type:'extraction_manufacturing', ll:[78.9,20.5],
+    claim:"India's 2006 SEZ regulations designated air conditioning as foundational infrastructure. Factory productivity drops 2% per 1°C rise.",
+    quote:'The UN now urges nations to leverage "thermal comfort" to attract investors.',
+    theories:['neoliberal','ecology'],
+    refs:[{ a:'Cross 2014', t:'Dream Zones: Anticipating Capitalism and Development in India', u:'https://www.plutobooks.com/9780745332741/dream-zones/' },{ a:'Somanathan et al. 2021', t:'Temperature impact on productivity: Evidence from Indian manufacturing', u:'https://www.journals.uchicago.edu/doi/10.1086/713733' }]},
+  { id:'silicon_valley',  name:'Silicon Valley',          location:'California, USA',    type:'data',          ll:[-122.0,37.5],
+    claim:'ASHRAE defines psychrometric comfort zones for servers as it once did for white-collar workers. Data centre masculinity: "uptime" as breadwinner identity.',
+    quote:'The stress of keeping servers running became a threat to heteronormative domestic life.',
+    theories:['feminist','neoliberal'],
+    refs:[{ a:'Gonzalez Monserrate 2023', t:'Thermotemporalities, thermomasculinities', u:'https://journals.sagepub.com/doi/10.1177/14614448221080361' }]},
+  { id:'datacentre_ireland', name:'Data Centres',         location:'Ireland',            type:'data',          ll:[-8.0,53.3],
+    claim:'Irish data centres used 21% of national electricity in 2023 — more than all urban homes combined. Amazon, Google, Microsoft, Apple.',
+    quote:'The comfort zone for digital infrastructure is poised to become the very nature it promised to transcend.',
+    theories:['ecology','neoliberal'],
+    refs:[{ a:'Ambrose 2024', t:"Ireland's datacentres overtake electricity use of all urban homes", u:'https://www.theguardian.com/world/article/2024/jul/23/ireland-datacentres-overtake-electricity-use-of-all-homes-combined-figures-show' }]},
+  { id:'border_mexico',   name:'US–Mexico Desert Border', location:'Sonoran Desert',     type:'humanitarian',  ll:[-112.0,31.5],
+    claim:'"Prevention through deterrence" pushes migrants into superheated desert — deliberately weaponizing heat as border control along the zone of increased ultraviolet risk.',
+    quote:'Border policies actively co-opt thermal conditions to harm and debilitate migrants.',
+    theories:['colonial','feminist'],
+    refs:[{ a:'De León 2015', t:'The Land of Open Graves: Living and Dying on the Migrant Trail', u:'https://www.ucpress.edu/book/9780520282186' }]},
+  { id:'border_balkans',  name:'EU External Border',      location:'Croatia–Bosnia',     type:'humanitarian',  ll:[16.5,44.5],
+    claim:'Border guards remove shoes, confiscate warm clothes, force migrants into freezing rivers at −3 to −27°C. Climate-changed weather amplifies this violence.',
+    quote:"Europe's border guards have repeatedly found ways to weaponize the cold.",
+    theories:['colonial','feminist'],
+    refs:[{ a:'Benghellab et al. 2025', t:'Four Seasons of Border Violence', u:'https://www.sciencedirect.com/science/article/pii/S0016718524002896' }]},
+  { id:'camp_burkina',    name:'Goudoubo Refugee Camp',   location:'Northern Burkina Faso', type:'humanitarian', ll:[-1.5,13.5],
+    claim:'33,000 Malian refugees improvised beyond UN shelter standards — repurposing aluminium from solar cookstoves and using evaporative cooling.',
+    quote:'People displaced by climate change rarely have only basic needs; they also have minimum ideas about what constitutes comfort.',
+    theories:['feminist','colonial'],
+    refs:[{ a:'Martin et al. 2020', t:'Shelter as Cladding: Refugee-led Innovation in Goudoubo Camp', u:'#' },{ a:'Scott-Smith 2019', t:'Beyond the Boxes: Refugee Shelter and Humanitarian Politics', u:'https://anthrosource.onlinelibrary.wiley.com/doi/10.1111/amet.12831' }]},
+  { id:'sugarcane',       name:'Sugarcane Plantations',   location:'Nicaragua / C. America', type:'food',       ll:[-86.0,13.0],
+    claim:'Chronic kidney disease epidemic linked to extreme heat. Voluntary shade-and-water standards foreclose broader claims to housing and clean water.',
+    quote:'The reduction of comfort to mere freedom from extreme heat makes it harder to advocate for reproductive wellbeing.',
+    theories:['feminist','colonial','ecology'],
+    refs:[{ a:'Nading 2023', t:'The Plantation as Hotspot', u:'https://journals.utp.unimelb.edu.au/index.php/mat/article/view/1741' },{ a:'Nading 2025', t:'The Kidney and the Cane', u:'https://www.dukeupress.edu/the-kidney-and-the-cane' }]},
+  { id:'pigs_usa',        name:'Industrial Pig Farming',  location:'Midwest USA',        type:'food',          ll:[-93.0,41.5],
+    claim:'Animal comfort zones are also human comfort zones: nervous sows miscarry, so farm workers must maintain calm in stalls. EU sets pig thermal comfort at 20–22°C.',
+    quote:'Animal farming depends on the creation of comfort zones.',
+    theories:['ecology','neoliberal'],
+    refs:[{ a:'Blanchette 2020', t:'Porkopolis: American Animality and the Factory Farm', u:'https://www.dukeupress.edu/porkopolis' }]},
+  { id:'tomato_border',   name:'Agri-food Cold Chain',    location:'US/Mexico border',   type:'food',          ll:[-99.0,26.0],
+    claim:'A tomato crossing the US–Mexico border traverses multiple zones of fertilizers, polytunnels, cold storage. Cold chains create unique microbiotic worlds for cryogenic suspension.',
+    quote:"The home refrigerator operates within a global 'cryosphere'.",
+    theories:['ecology'],
+    refs:[{ a:'Freidberg 2010', t:'Fresh: A Perishable History', u:'https://www.hup.harvard.edu/books/9780674034396' },{ a:'Radin & Kowal 2017', t:'Cryopolitics: Frozen Life in a Melting World', u:'https://mitpress.mit.edu/9780262533768/' }]},
+  { id:'kigali',          name:'Sustainable Cooling Centre', location:'Kigali, Rwanda',  type:'food',          ll:[30.1,-1.9],
+    claim:'UK-funded IoT cold-chain training in Kigali integrates regional farmers into global food markets — connecting food comfort zones to cloud server zones.',
+    quote:'The future of food supply chains is imagined as a digital thermal economy.',
+    theories:['ecology','neoliberal'],
+    refs:[{ a:'Cross 2025', t:'Mold Chains', u:'#' }]},
+  { id:'redlining',       name:'Redlined Urban Heat Zones', location:'Chicago / Baltimore / Dallas', type:'extraction_manufacturing', ll:[-87.6,41.8],
+    claim:'Racial segregation through redlining has lasting thermal effects. Staying cool without AC demands higher inputs of feminised reproductive labour.',
+    quote:'Women — particularly women of colour — naturalized as producers of comfort, yet seen as undeserving of it.',
+    theories:['feminist','colonial'],
+    refs:[{ a:'Hamstead et al. 2018', t:'Landscape-based Extreme Heat Vulnerability Assessment', u:'#' },{ a:'Klinenberg 2015', t:'Heat Wave: A Social Autopsy of Disaster in Chicago', u:'https://press.uchicago.edu/ucp/books/book/chicago/H/bo20383819.html' }]},
+  { id:'prisons_texas',   name:'Texas Prison System',     location:'Texas, USA',         type:'extraction_manufacturing', ll:[-99.0,31.5],
+    claim:'Non-white prisoners housed without air conditioning. Routinized heat exposure traces to the plantation "sweatbox". Comfort as a human right.',
+    quote:'The routinized exposure of incarcerated people to extreme heat can be traced to the American plantation.',
+    theories:['colonial','feminist'],
+    refs:[{ a:'Terwiel 2018', t:'What is the Problem with High Prison Temperatures?', u:'#' },{ a:'Starosielski 2021', t:'Media Hot and Cold', u:'https://www.dukeupress.edu/media-hot-and-cold' }]},
+  { id:'guimaraes',       name:'Casa do Vapor',           location:'Guimarães, Portugal', type:'alternatives',  ll:[-8.3,41.4],
+    claim:'Participatory architecture using repurposed pinewood for passive cooling — community-made comfort refusing the divide between thermal sensation and affect.',
+    quote:'Designers make addressing discomfort a collective, even liberating project.',
+    theories:['feminist','ecology'],
+    refs:[{ a:'Barber et al. 2023', t:'After Comfort: A User\'s Guide', u:'https://www.e-flux.com/architecture/after-comfort/568230/editorial/' }]},
+  { id:'cooling_commons', name:'Cooling the Commons',     location:'Sydney, Australia',  type:'alternatives',  ll:[151.2,-33.9],
+    claim:'Community-designed heat-resilient public spaces integrate local knowledge into urban cooling — collective comfort zones beyond technical standards.',
+    quote:'The comfort zone becomes a key terrain of collective mobilisation against environmental injustice.',
+    theories:['feminist','ecology'],
+    refs:[{ a:'Lopes et al. 2018', t:'Infrastructures of Care: "Home" as Commons in a Hot City', u:'https://humanecologyreview.org/index.php/humanecologyreview/article/view/68' }]},
+  { id:'freehouse',       name:'FreeHouse',               location:'United Kingdom',     type:'alternatives',  ll:[-1.5,53.5],
+    claim:'Speculative zero-carbon homes as self-contained comfort zones — bio-based materials, circular construction, civic trust financing. Comfort by other means.',
+    quote:'Discomfort is an accommodation of needs through different materials, technologies and realities.',
+    theories:['ecology','feminist'],
+    refs:[{ a:'Johar 2022', t:'Radicle Civics — Unconstituting Society', u:'#' }]},
+];
+
+const FLOWS = [
+  { from:'cobalt_drc',     to:'silicon_valley',      type:'capital',    label:'Cobalt → microchips' },
+  { from:'cobalt_drc',     to:'datacentre_ireland',  type:'capital',    label:'Cobalt → data centres' },
+  { from:'oil_westafrica', to:'silicon_valley',      type:'fuel',       label:'Oil → energy' },
+  { from:'niger_delta',    to:'datacentre_ireland',  type:'fuel',       label:'Fuel → cloud' },
+  { from:'sez_india',      to:'silicon_valley',      type:'capital',    label:'Manufacturing → capital' },
+  { from:'silicon_valley', to:'datacentre_ireland',  type:'data_flow',  label:'Cloud data' },
+  { from:'camp_burkina',   to:'border_balkans',      type:'migration',  label:'Climate migration' },
+  { from:'sugarcane',      to:'border_mexico',       type:'migration',  label:'Labour migration' },
+  { from:'cobalt_drc',     to:'camp_burkina',        type:'migration',  label:'Displacement' },
+  { from:'tomato_border',  to:'pigs_usa',            type:'food',       label:'Agri-food network' },
+  { from:'kigali',         to:'datacentre_ireland',  type:'data_flow',  label:'IoT cold chain data' },
+  { from:'iraq_fob',       to:'sez_india',           type:'capital',    label:'Petro-capital' },
+  { from:'oil_westafrica', to:'niger_delta',         type:'fuel',       label:'Extraction network' },
+  { from:'redlining',      to:'prisons_texas',       type:'capital',    label:'Carceral geography' },
+];
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+const state = {
+  activeZones:   new Set(ZONE_TYPES.map(z=>z.id)),
+  activeFlows:   new Set(FLOW_TYPES.map(f=>f.id)),
+  activeTheories:new Set(),
+  selectedSite:  null,
+};
+
+// ═══════════════════════════════════════════════════════════════
+// THREE.JS SETUP
+// ═══════════════════════════════════════════════════════════════
+let scene, camera, renderer, globe, starField;
+let siteGroups = []; // {mesh, site, color}
+let flowObjects = []; // {line, type, progress}
+let theoryGlows = {}; // id → mesh
+let animId;
+
+// Mouse state for drag rotation
+let isDragging=false, prevMouse={x:0,y:0};
+let targetRotY=0, targetRotX=0, currentRotY=0.4, currentRotX=0.1;
+let autoRotate=false;
+
+// Raycasting
+let raycaster, mouse;
+let hoveredSite=null;
+
+const GLOBE_R = 2.4;
+
+function llToXYZ(lon, lat, r) {
+  const phi   = (90 - lat) * Math.PI / 180;
+  const theta = (lon + 180) * Math.PI / 180;
+  return new THREE.Vector3(
+    -r * Math.sin(phi) * Math.cos(theta),
+     r * Math.cos(phi),
+     r * Math.sin(phi) * Math.sin(theta)
+  );
+}
+
+// ── GLOBE TEXTURE ──
+function buildGlobeTexture() {
+  const W=2048, H=1024;
+  const c = document.createElement('canvas');
+  c.width=W; c.height=H;
+  const ctx = c.getContext('2d');
+
+  // Ocean
+  ctx.fillStyle='#05090e';
+  ctx.fillRect(0,0,W,H);
+
+  // Grid lines
+  ctx.strokeStyle='rgba(255,255,255,0.04)';
+  ctx.lineWidth=0.5;
+  for(let lon=-180;lon<=180;lon+=30){
+    const x=(lon+180)/360*W;
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+  }
+  for(let lat=-90;lat<=90;lat+=30){
+    const y=(90-lat)/180*H;
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+  }
+
+  return new THREE.CanvasTexture(c);
+}
+
+// We'll overlay country geometry as line meshes on the globe surface
+// by fetching topojson and projecting vertices onto sphere
+
+async function buildCountryLines() {
+  try {
+    const world = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(r=>r.json());
+    // Use topojson to get feature list — but THREE has no d3/topojson
+    // So we fetch and use a simple approach: draw the mesh edges manually
+    // We'll extract arcs from the topojson directly
+    const arcs = world.arcs; // array of arrays of [dx,dy] (delta-encoded)
+    const transform = world.transform;
+    const scale = transform.scale;
+    const translate = transform.translate;
+
+    const lineGroup = new THREE.Group();
+    const mat = new THREE.LineBasicMaterial({ color:0x1e3050, transparent:true, opacity:0.9, linewidth:1 });
+
+    arcs.forEach(arc => {
+      if(arc.length < 2) return;
+      const points = [];
+      let x=0, y=0;
+      arc.forEach(([dx,dy]) => {
+        x+=dx; y+=dy;
+        const lon = x*scale[0]+translate[0];
+        const lat = y*scale[1]+translate[1];
+        const v = llToXYZ(lon, lat, GLOBE_R+0.004);
+        points.push(v);
+      });
+      if(points.length<2) return;
+      const geo = new THREE.BufferGeometry().setFromPoints(points);
+      lineGroup.add(new THREE.Line(geo, mat));
+    });
+
+    return lineGroup;
+  } catch(e) {
+    console.warn('Country lines failed:', e);
+    return null;
+  }
+}
+
+// ── ATMOSPHERE SHADER ──
+function buildAtmosphere() {
+  const vs = `
+    varying vec3 vNormal;
+    void main() {
+      vNormal = normalize(normalMatrix * normal);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+    }
+  `;
+  const fs = `
+    varying vec3 vNormal;
+    uniform vec3 glowColor;
+    void main() {
+      float intensity = pow(0.55 - dot(vNormal, vec3(0,0,1.0)), 3.0);
+      gl_FragColor = vec4(glowColor, intensity * 0.7);
+    }
+  `;
+  const mat = new THREE.ShaderMaterial({
+    uniforms:{ glowColor:{ value:new THREE.Color(0x0a2040) } },
+    vertexShader:vs, fragmentShader:fs,
+    side:THREE.BackSide, blending:THREE.AdditiveBlending,
+    transparent:true, depthWrite:false
+  });
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(GLOBE_R*1.18, 64, 64), mat);
+  return mesh;
+}
+
+// ── STAR FIELD ──
+function buildStars() {
+  const geo = new THREE.BufferGeometry();
+  const N = 3500;
+  const pos = new Float32Array(N*3);
+  const col = new Float32Array(N*3);
+  for(let i=0;i<N;i++){
+    const r = 40+Math.random()*60;
+    const theta=Math.random()*Math.PI*2, phi=Math.acos(2*Math.random()-1);
+    pos[i*3]   = r*Math.sin(phi)*Math.cos(theta);
+    pos[i*3+1] = r*Math.sin(phi)*Math.sin(theta);
+    pos[i*3+2] = r*Math.cos(phi);
+    const bright = 0.3+Math.random()*0.7;
+    col[i*3]=bright; col[i*3+1]=bright; col[i*3+2]=bright;
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('color', new THREE.BufferAttribute(col,3));
+  const mat = new THREE.PointsMaterial({ size:0.06, vertexColors:true, transparent:true, opacity:0.7, sizeAttenuation:true });
+  return new THREE.Points(geo, mat);
+}
+
+// ── SITE NODE (pillar + sphere) ──
+function buildSiteNode(site, color) {
+  const group = new THREE.Group();
+  const pos = llToXYZ(site.ll[0], site.ll[1], GLOBE_R);
+  const norm = pos.clone().normalize();
+
+  // Pillar
+  const h = 0.08;
+  const pillarGeo = new THREE.CylinderGeometry(0.012, 0.018, h, 8);
+  const pillarMat = new THREE.MeshBasicMaterial({ color, transparent:true, opacity:0.9 });
+  const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+
+  // Sphere top
+  const sphereGeo = new THREE.SphereGeometry(0.035, 12, 12);
+  const sphereMat = new THREE.MeshBasicMaterial({ color, transparent:true, opacity:0.95 });
+  const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+  sphere.position.y = h/2 + 0.035;
+
+  // Glow disc
+  const glowGeo = new THREE.SphereGeometry(0.065, 12, 12);
+  const glowMat = new THREE.MeshBasicMaterial({ color, transparent:true, opacity:0.18, depthWrite:false });
+  const glow = new THREE.Mesh(glowGeo, glowMat);
+  glow.position.y = h/2 + 0.035;
+
+  // Pulse ring (flat torus)
+  const ringGeo = new THREE.TorusGeometry(0.06, 0.005, 4, 32);
+  const ringMat = new THREE.MeshBasicMaterial({ color, transparent:true, opacity:0.5, depthWrite:false });
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.rotation.x = Math.PI/2;
+  ring.position.y = 0.01;
+  ring.userData.isRing = true;
+
+  group.add(pillar, sphere, glow, ring);
+
+  // Orient to surface normal
+  group.position.copy(pos);
+  const up = new THREE.Vector3(0,1,0);
+  const quaternion = new THREE.Quaternion().setFromUnitVectors(up, norm);
+  group.setRotationFromQuaternion(quaternion);
+
+  group.userData = { site, color, baseOpacity:0.9 };
+  return group;
+}
+
+// ── FLOW ARC ──
+function buildFlowArc(sitesMap, flow, color) {
+  const src = sitesMap[flow.from];
+  const dst = sitesMap[flow.to];
+  if(!src||!dst) return null;
+
+  const p1 = llToXYZ(src.ll[0], src.ll[1], GLOBE_R);
+  const p2 = llToXYZ(dst.ll[0], dst.ll[1], GLOBE_R);
+
+  // Arc height proportional to distance
+  const mid = p1.clone().add(p2).multiplyScalar(0.5);
+  const dist = p1.distanceTo(p2);
+  const h = GLOBE_R + dist * 0.35 + 0.3;
+  const ctrl = mid.normalize().multiplyScalar(h);
+
+  const curve = new THREE.QuadraticBezierCurve3(p1, ctrl, p2);
+  const N=80;
+  const points = curve.getPoints(N);
+
+  // Base line
+  const geo = new THREE.BufferGeometry().setFromPoints(points);
+  const mat = new THREE.LineBasicMaterial({
+    color:new THREE.Color(color), transparent:true, opacity:0.2
+  });
+  const line = new THREE.Line(geo, mat);
+
+  // Animated tracer
+  const tracerLen = 12;
+  const tracerGeo = new THREE.BufferGeometry().setFromPoints(points.slice(0, tracerLen));
+  const tracerMat = new THREE.LineBasicMaterial({
+    color:new THREE.Color(color), transparent:true, opacity:0.85
+  });
+  const tracer = new THREE.Line(tracerGeo, tracerMat);
+
+  return { line, tracer, points, progress:Math.random(), type:flow.type, color, label:flow.label };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT THREE
+// ═══════════════════════════════════════════════════════════════
+async function initThree() {
+  const wrap = document.getElementById('canvas-wrap');
+  const canvas = document.getElementById('three-canvas');
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x05080f);
+
+  camera = new THREE.PerspectiveCamera(45, W/H, 0.1, 200);
+  camera.position.set(0, 0, 7.5);
+
+  renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:false });
+  renderer.setSize(W, H);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2();
+
+  // Stars
+  starField = buildStars();
+  scene.add(starField);
+
+  // Atmosphere
+  scene.add(buildAtmosphere());
+
+  // Globe
+  const globeGeo = new THREE.SphereGeometry(GLOBE_R, 128, 128);
+  const globeTex = buildGlobeTexture();
+  const globeMat = new THREE.MeshPhongMaterial({
+    map: globeTex,
+    color: 0x0a1828,
+    emissive: 0x040810,
+    shininess: 12,
+  });
+  globe = new THREE.Mesh(globeGeo, globeMat);
+  scene.add(globe);
+
+  // Temperature atmosphere tint mesh (colour updated by temp layer)
+  addAtmosphereTempMesh(globe);
+
+  // Ambient + directional light
+  scene.add(new THREE.AmbientLight(0x1a2535, 2.5));
+  const dLight = new THREE.DirectionalLight(0x5588cc, 1.2);
+  dLight.position.set(5, 3, 5);
+  scene.add(dLight);
+  const dLight2 = new THREE.DirectionalLight(0xff8844, 0.3);
+  dLight2.position.set(-5,-3,-5);
+  scene.add(dLight2);
+
+  // Country outlines
+  const countryLines = await buildCountryLines();
+  if(countryLines) globe.add(countryLines);
+
+  // Site nodes
+  const sitesMap = {};
+  SITES.forEach(s => { sitesMap[s.id]=s; });
+
+  SITES.forEach(site => {
+    const ztype = ZONE_TYPES.find(z=>z.id===site.type);
+    const color = ztype ? ztype.color : '#ffffff';
+    const grp = buildSiteNode(site, new THREE.Color(color));
+    grp.userData.siteData = site;
+    grp.userData.colorHex = color;
+    globe.add(grp);
+    siteGroups.push({ group:grp, site, color });
+  });
+
+  // Flow arcs (added to scene, not globe, so they don't rotate wrong)
+  FLOWS.forEach(flow => {
+    const ft = FLOW_TYPES.find(f=>f.id===flow.type);
+    if(!ft) return;
+    const obj = buildFlowArc(sitesMap, flow, ft.color);
+    if(!obj) return;
+    globe.add(obj.line);
+    globe.add(obj.tracer);
+    flowObjects.push(obj);
+  });
+
+  // Theory glow spheres (large transparent spheres with emissive tint)
+  THEORY_LAYERS.forEach(t => {
+    const tMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(GLOBE_R+0.04, 64, 64),
+      new THREE.MeshBasicMaterial({
+        color: new THREE.Color(t.color),
+        transparent:true, opacity:0.04, depthWrite:false,
+        side:THREE.FrontSide, blending:THREE.AdditiveBlending
+      })
+    );
+    tMesh.visible = false;
+    globe.add(tMesh);
+    theoryGlows[t.id] = tMesh;
+  });
+
+  setupEvents(wrap);
+  animate();
+
+  // Done loading
+  setTimeout(()=>{ document.getElementById('loading').classList.add('done'); }, 800);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ANIMATION LOOP
+// ═══════════════════════════════════════════════════════════════
+let clock = { t:0 };
+
+function animate() {
+  animId = requestAnimationFrame(animate);
+  clock.t += 0.016;
+
+  // Smooth rotation
+  if(autoRotate && !isDragging) targetRotY += 0.0012;
+  currentRotY += (targetRotY - currentRotY) * 0.06;
+  currentRotX += (targetRotX - currentRotX) * 0.06;
+  globe.rotation.y = currentRotY;
+  globe.rotation.x = Math.max(-0.5, Math.min(0.5, currentRotX));
+
+  // Slow star drift
+  starField.rotation.y += 0.00005;
+
+  // Animate flow tracers
+  flowObjects.forEach(obj => {
+    if(!obj.line.visible) return;
+    obj.progress += 0.008;
+    if(obj.progress > 1) obj.progress = 0;
+    const N = obj.points.length;
+    const tracerLen = 14;
+    const start = Math.floor(obj.progress * N);
+    const slice = [];
+    for(let i=0;i<tracerLen;i++){
+      slice.push(obj.points[(start+i)%N]);
+    }
+    obj.tracer.geometry.setFromPoints(slice);
+    obj.tracer.geometry.attributes.position.needsUpdate=true;
+  });
+
+  // Pulse rings
+  siteGroups.forEach(({group}) => {
+    group.children.forEach(c => {
+      if(c.userData.isRing){
+        const scale = 1 + 0.3*Math.sin(clock.t*2 + group.position.x);
+        c.scale.set(scale,scale,scale);
+        c.material.opacity = 0.4 + 0.2*Math.sin(clock.t*2 + group.position.x);
+      }
+    });
+  });
+
+  renderer.render(scene, camera);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════════════════════════════════
+function setupEvents(wrap) {
+  // Mouse drag rotation
+  wrap.addEventListener('mousedown', e => {
+    isDragging=true; autoRotate=false;
+    prevMouse={x:e.clientX,y:e.clientY};
+  });
+  window.addEventListener('mousemove', e => {
+    if(isDragging){
+      const dx=(e.clientX-prevMouse.x)*0.005;
+      const dy=(e.clientY-prevMouse.y)*0.004;
+      targetRotY+=dx; targetRotX+=dy;
+      prevMouse={x:e.clientX,y:e.clientY};
+    }
+    updateMouseHover(e, wrap);
+  });
+  window.addEventListener('mouseup', ()=>{ isDragging=false; });
+
+  // Touch
+  wrap.addEventListener('touchstart', e=>{
+    isDragging=true; autoRotate=false;
+    prevMouse={x:e.touches[0].clientX,y:e.touches[0].clientY};
+  }, {passive:true});
+  wrap.addEventListener('touchmove', e=>{
+    if(!isDragging) return;
+    const dx=(e.touches[0].clientX-prevMouse.x)*0.005;
+    const dy=(e.touches[0].clientY-prevMouse.y)*0.004;
+    targetRotY+=dx; targetRotX+=dy;
+    prevMouse={x:e.touches[0].clientX,y:e.touches[0].clientY};
+  }, {passive:true});
+  wrap.addEventListener('touchend', ()=>{ isDragging=false; });
+
+  // Scroll zoom
+  wrap.addEventListener('wheel', e=>{
+    e.preventDefault();
+    const z = camera.position.z + e.deltaY*0.01;
+    camera.position.z = Math.max(3.5, Math.min(14, z));
+  }, {passive:false});
+
+  // Click site
+  wrap.addEventListener('click', e=>{
+    const hit = getHoveredSite(e, wrap);
+    if(hit){ selectSite(hit.site, hit.colorHex); }
+    else { clearSite(); }
+  });
+
+  // Resize
+  window.addEventListener('resize', ()=>{
+    const W=wrap.clientWidth, H=wrap.clientHeight;
+    camera.aspect=W/H; camera.updateProjectionMatrix();
+    renderer.setSize(W,H);
+  });
+}
+
+function getHoveredSite(e, wrap) {
+  const rect = wrap.getBoundingClientRect();
+  mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const meshes = siteGroups.map(sg=>sg.group.children[1]).filter(Boolean); // sphere tops
+  const hits = raycaster.intersectObjects(meshes);
+  if(!hits.length) return null;
+  const mesh = hits[0].object;
+  return siteGroups.find(sg => sg.group.children[1]===mesh) || null;
+}
+
+function updateMouseHover(e, wrap) {
+  const hit = getHoveredSite(e, wrap);
+  const tt = document.getElementById('tooltip-3d');
+  const rect = wrap.getBoundingClientRect();
+
+  if(hit) {
+    hoveredSite = hit.site;
+    document.getElementById('tt3-type').textContent = ZONE_TYPES.find(z=>z.id===hit.site.type)?.label || hit.site.type;
+    document.getElementById('tt3-type').style.color = hit.colorHex;
+    document.getElementById('tt3-name').textContent = hit.site.name;
+    tt.classList.add('vis');
+    let tx = e.clientX - rect.left + 14;
+    let ty = e.clientY - rect.top - 10;
+    if(tx+210>rect.width) tx = e.clientX-rect.left-220;
+    tt.style.left = tx+'px';
+    tt.style.top = ty+'px';
+    wrap.style.cursor='pointer';
+
+    // Highlight hovered node
+    hit.group.children.forEach(c=>{ if(c.material) c.material.opacity = Math.min(1, (c.material.opacity||0.9)+0.1); });
+  } else {
+    hoveredSite=null;
+    tt.classList.remove('vis');
+    wrap.style.cursor='grab';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// VISIBILITY UPDATES
+// ═══════════════════════════════════════════════════════════════
+function updateNodeVisibility() {
+  siteGroups.forEach(({group, site}) => {
+    const vis = state.activeZones.has(site.type);
+    group.visible = vis;
+  });
+}
+
+function updateFlowVisibility() {
+  flowObjects.forEach(obj => {
+    const vis = state.activeFlows.has(obj.type);
+    obj.line.visible = vis;
+    obj.tracer.visible = vis;
+  });
+}
+
+function updateTheoryVisibility() {
+  THEORY_LAYERS.forEach(t => {
+    if(theoryGlows[t.id]) theoryGlows[t.id].visible = state.activeTheories.has(t.id);
+  });
+  updateNodeTheoryHighlight();
+}
+
+function updateNodeTheoryHighlight() {
+  const anyActive = state.activeTheories.size > 0;
+  siteGroups.forEach(({group, site}) => {
+    const relevant = !anyActive || site.theories.some(t=>state.activeTheories.has(t));
+    group.children.forEach(c=>{
+      if(c.material) {
+        if(c.userData.isRing) return;
+        const base = c.geometry?.type==='SphereGeometry' ? 0.95 : 0.85;
+        c.material.opacity = relevant ? base : 0.12;
+      }
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SITE DETAIL
+// ═══════════════════════════════════════════════════════════════
+function selectSite(site, colorHex) {
+  state.selectedSite = site.id;
+
+  // Fly toward site
+  const pos3d = llToXYZ(site.ll[0], site.ll[1], 1);
+  // We rotate the globe to face it
+  // target rotation so the site is front-center
+  const lon = site.ll[0];
+  const lat = site.ll[1];
+  targetRotY = -(lon+180)*Math.PI/180 + Math.PI;
+  targetRotX = lat*Math.PI/180*0.5;
+  autoRotate = false;
+
+  // Zoom slightly in
+  const targetZ = Math.max(4, camera.position.z - 0.5);
+  camera.position.z = targetZ;
+
+  // Highlight selected node
+  siteGroups.forEach(({group, site:s}) => {
+    const isSelected = s.id === site.id;
+    group.children.forEach(c=>{
+      if(c.material && !c.userData.isRing){
+        c.material.opacity = isSelected ? 1.0 : 0.3;
+      }
+    });
+  });
+
+  buildDetailPanel(site, colorHex);
+}
+
+function clearSite() {
+  state.selectedSite = null;
+  siteGroups.forEach(({group}) => {
+    group.children.forEach(c=>{
+      if(c.material && !c.userData.isRing) {
+        const base = c.geometry?.type==='SphereGeometry' ? 0.95 : 0.85;
+        c.material.opacity = base;
+      }
+    });
+  });
+  updateNodeTheoryHighlight();
+  document.getElementById('info-default').style.display='block';
+  document.getElementById('info-site').style.display='none';
+  document.getElementById('back-btn').style.display='none';
+}
+window.clearSite = clearSite;
+
+function buildDetailPanel(site, colorHex) {
+  const ztype = ZONE_TYPES.find(z=>z.id===site.type);
+  const theoryTags = site.theories.map(tid=>{
+    const t=THEORY_LAYERS.find(x=>x.id===tid);
+    return `<span class="theory-tag" style="color:${t.color};border-color:${t.color}40">${t.label}</span>`;
+  }).join('');
+  const refItems = site.refs.map(r=>`
+    <div class="ref-item">
+      <a href="${r.u}" target="_blank">↗ ${r.a}</a>
+      <span>${r.t}</span>
+    </div>`).join('');
+
+  document.getElementById('info-site').innerHTML = `
+    <div class="si-type" style="color:${colorHex}">
+      <span class="si-dot" style="background:${colorHex}"></span>${ztype?.label||site.type}
+    </div>
+    <div class="si-name">${site.name}</div>
+    <div class="si-loc">📍 ${site.location}</div>
+    <div class="si-claim" style="border-color:${colorHex}50">${site.claim}</div>
+    ${site.quote?`<div class="si-quote">"${site.quote}"</div>`:''}
+    <div style="margin-bottom:12px">${theoryTags}</div>
+    <div class="refs-label">References</div>
+    ${refItems}
+    <a href="https://doi.org/10.1080/03085147.2025.2603819" target="_blank" style="font-family:'Space Mono',monospace;font-size:9px;color:#3d4f6a;text-decoration:none;display:block;margin-top:10px;">↗ Cross & Nading 2026 · Economy & Society</a>
+  `;
+  document.getElementById('info-default').style.display='none';
+  document.getElementById('info-site').style.display='block';
+  document.getElementById('back-btn').style.display='flex';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BUILD UI CONTROLS
+// ═══════════════════════════════════════════════════════════════
+function buildControls() {
+  const zt = document.getElementById('zone-toggles');
+  ZONE_TYPES.forEach(z => {
+    const btn = document.createElement('button');
+    btn.className='layer-btn active';
+    btn.innerHTML=`<span class="swatch" style="background:${z.color}"></span>${z.label}<span class="check">✓</span>`;
+    btn.onclick=()=>{
+      if(state.activeZones.has(z.id)){state.activeZones.delete(z.id);btn.classList.remove('active');}
+      else{state.activeZones.add(z.id);btn.classList.add('active');}
+      updateNodeVisibility();
+    };
+    zt.appendChild(btn);
+  });
+
+  const ft = document.getElementById('flow-toggles');
+  FLOW_TYPES.forEach(f => {
+    const btn = document.createElement('button');
+    btn.className='flow-btn active';
+    btn.innerHTML=`<span class="flow-line" style="background:${f.color}"></span>${f.label}<span class="check">✓</span>`;
+    btn.onclick=()=>{
+      if(state.activeFlows.has(f.id)){state.activeFlows.delete(f.id);btn.classList.remove('active');}
+      else{state.activeFlows.add(f.id);btn.classList.add('active');}
+      updateFlowVisibility();
+    };
+    ft.appendChild(btn);
+  });
+
+  const tt = document.getElementById('theory-toggles');
+  THEORY_LAYERS.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className='layer-btn';
+    btn.innerHTML=`<span class="swatch" style="background:${t.color};border-radius:2px"></span>${t.label}<span class="check">✓</span>`;
+    btn.onclick=()=>{
+      if(state.activeTheories.has(t.id)){state.activeTheories.delete(t.id);btn.classList.remove('active');}
+      else{state.activeTheories.add(t.id);btn.classList.add('active');}
+      updateTheoryVisibility();
+    };
+    tt.appendChild(btn);
+  });
+
+  // Legend
+  const lz = document.getElementById('leg-zones');
+  ZONE_TYPES.forEach(z=>{
+    lz.innerHTML+=`<div class="leg-item"><span class="leg-dot" style="background:${z.color}"></span><span>${z.label}</span></div>`;
+  });
+  const lf = document.getElementById('leg-flows');
+  FLOW_TYPES.forEach(f=>{
+    lf.innerHTML+=`<div class="leg-item"><span class="leg-dot" style="background:${f.color};border-radius:2px;height:3px;width:14px"></span><span style="font-size:10px">${f.label}</span></div>`;
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TEMPERATURE LAYER
+// ═══════════════════════════════════════════════════════════════
+
+let tempData = {};        // year → anomaly (averaged from monthly)
+let tempYears = [];       // sorted array of years with data
+let tempLayerOpen = false;
+let atmosphereMesh = null; // the colour-tinted sphere inside globe
+
+// Color scale: cool blue → neutral → warm orange → hot red
+function anomalyToColor(val) {
+  // val range roughly -0.6 to +1.6
+  const t = Math.max(0, Math.min(1, (val + 0.6) / 2.2));
+  // 0.0 → deep blue  (#0d3b6e)
+  // 0.27 → steel blue (#4a7fa8)
+  // 0.45 → neutral   (#2d3545)
+  // 0.65 → amber     (#f59e0b)
+  // 0.85 → orange    (#f97316)
+  // 1.0  → red       (#ef4444)
+  const stops = [
+    [0.00, [13,  59, 110]],
+    [0.27, [74, 127, 168]],
+    [0.45, [45,  53,  69]],
+    [0.65, [245,158, 11]],
+    [0.85, [249,115, 22]],
+    [1.00, [239, 68, 68]],
+  ];
+  let r=0,g=0,b=0;
+  for(let i=0;i<stops.length-1;i++){
+    const [t0,c0]=stops[i], [t1,c1]=stops[i+1];
+    if(t>=t0 && t<=t1){
+      const f=(t-t0)/(t1-t0);
+      r=Math.round(c0[0]+(c1[0]-c0[0])*f);
+      g=Math.round(c0[1]+(c1[1]-c0[1])*f);
+      b=Math.round(c0[2]+(c1[2]-c0[2])*f);
+      break;
+    }
+  }
+  return { r, g, b, hex:`#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}` };
+}
+
+function anomalyDescription(val, year) {
+  if(val < -0.2) return `In ${year}, Earth was ${Math.abs(val).toFixed(2)}°C cooler than the pre-industrial baseline — a period of relative stability before the industrial era fully took hold.`;
+  if(val < 0.0)  return `In ${year}, temperatures were ${Math.abs(val).toFixed(2)}°C below baseline. Early industrialisation had not yet visibly shifted the climate.`;
+  if(val < 0.3)  return `In ${year}, a slight warming of +${val.toFixed(2)}°C above baseline. Industrial emissions were accumulating but effects remained subtle.`;
+  if(val < 0.6)  return `In ${year}, warming reached +${val.toFixed(2)}°C. The post-war industrial boom and fossil fuel expansion began to register in global temperatures.`;
+  if(val < 0.9)  return `In ${year}, anomaly of +${val.toFixed(2)}°C — the era of accelerating warming. Comfort zones multiply; sacrifice zones expand.`;
+  if(val < 1.2)  return `In ${year}, +${val.toFixed(2)}°C above baseline. The thermal economy is in full operation: data centres, border zones, and plantation heat all intensify.`;
+  return `In ${year}, +${val.toFixed(2)}°C — among the hottest years on record. The "comfort zone" is now a planetary condition, unevenly distributed across bodies and geographies.`;
+}
+
+async function loadTempData() {
+  try {
+    const res = await fetch('https://global-warming.org/api/temperature-api');
+    const json = await res.json();
+    // Monthly entries: {time:"1880.04", station:"-0.32", land:"-0.19"}
+    // Average station & land, group by year
+    const byYear = {};
+    json.result.forEach(d => {
+      const yr = Math.floor(parseFloat(d.time));
+      const v = (parseFloat(d.station) + parseFloat(d.land)) / 2;
+      if(!byYear[yr]) byYear[yr] = [];
+      byYear[yr].push(v);
+    });
+    Object.keys(byYear).forEach(yr => {
+      const arr = byYear[yr];
+      tempData[yr] = arr.reduce((a,b)=>a+b,0) / arr.length;
+    });
+    tempYears = Object.keys(tempData).map(Number).sort((a,b)=>a-b);
+    // Update slider range
+    const maxYr = Math.max(...tempYears);
+    const slider = document.getElementById('temp-slider');
+    slider.max = maxYr;
+    slider.value = maxYr;
+    drawSparkline();
+    applyYear(maxYr);
+  } catch(e) {
+    console.warn('Temperature data load failed', e);
+    document.getElementById('temp-desc').textContent = 'Live data unavailable — check network connection.';
+  }
+}
+
+function drawSparkline() {
+  const canvas = document.getElementById('temp-sparkline');
+  const W = canvas.offsetWidth; const H = canvas.offsetHeight;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  if(!tempYears.length) return;
+
+  const vals = tempYears.map(y => tempData[y]);
+  const minV = Math.min(...vals);
+  const maxV = Math.max(...vals);
+  const minY = tempYears[0];
+  const maxY = tempYears[tempYears.length-1];
+
+  const toX = yr => (yr - minY) / (maxY - minY) * (W-2) + 1;
+  const toY = v  => H - 4 - (v - minV) / (maxV - minV) * (H-10);
+
+  // Zero line
+  const zeroY = toY(0);
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+  ctx.lineWidth = 0.5;
+  ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(0,zeroY); ctx.lineTo(W,zeroY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 1.5°C Paris line
+  const parisY = toY(1.5);
+  ctx.strokeStyle = 'rgba(239,68,68,0.3)';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(0,parisY); ctx.lineTo(W,parisY); ctx.stroke();
+  ctx.fillStyle = 'rgba(239,68,68,0.5)';
+  ctx.font = '7px Space Mono, monospace';
+  ctx.fillText('1.5°C', W-32, parisY-2);
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0,0,W,0);
+  grad.addColorStop(0, 'rgba(13,59,110,0.4)');
+  grad.addColorStop(0.55, 'rgba(245,158,11,0.4)');
+  grad.addColorStop(1, 'rgba(239,68,68,0.6)');
+
+  ctx.beginPath();
+  ctx.moveTo(toX(minY), H);
+  tempYears.forEach((yr,i) => {
+    const x=toX(yr), y=toY(vals[i]);
+    if(i===0) ctx.lineTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.lineTo(toX(maxY), H);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Main line
+  ctx.beginPath();
+  tempYears.forEach((yr,i)=>{
+    const x=toX(yr), y=toY(vals[i]);
+    const col = anomalyToColor(vals[i]);
+    if(i===0){ ctx.moveTo(x,y); return; }
+    ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle = '#8ca0b8';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Current year marker — draw after so it's on top
+  const curYr = parseInt(document.getElementById('temp-slider').value);
+  drawSparklineMarker(curYr);
+}
+
+function drawSparklineMarker(year) {
+  const canvas = document.getElementById('temp-sparkline');
+  const W = canvas.width, H = canvas.height;
+  const ctx = canvas.getContext('2d');
+  if(!tempYears.length || !tempData[year]) return;
+
+  const vals = tempYears.map(y => tempData[y]);
+  const minV = Math.min(...vals), maxV = Math.max(...vals);
+  const minY = tempYears[0], maxY = tempYears[tempYears.length-1];
+  const toX = yr => (yr - minY) / (maxY - minY) * (W-2) + 1;
+  const toY = v  => H - 4 - (v - minV) / (maxV - minV) * (H-10);
+
+  const x = toX(year);
+  const y = toY(tempData[year]);
+  const col = anomalyToColor(tempData[year]);
+
+  // Vertical rule
+  ctx.strokeStyle = `${col.hex}88`;
+  ctx.lineWidth = 1;
+  ctx.setLineDash([2,2]);
+  ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Dot
+  ctx.beginPath();
+  ctx.arc(x, y, 4, 0, Math.PI*2);
+  ctx.fillStyle = col.hex;
+  ctx.fill();
+  ctx.strokeStyle = '#05080f';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+}
+
+function applyYear(year) {
+  const val = tempData[year];
+  if(val === undefined) return;
+
+  const col = anomalyToColor(val);
+  const sign = val >= 0 ? '+' : '';
+
+  document.getElementById('temp-year-label').textContent = year;
+  const valEl = document.getElementById('temp-current-val');
+  valEl.textContent = `${sign}${val.toFixed(2)}°C`;
+  valEl.style.color = col.hex;
+  document.getElementById('temp-desc').textContent = anomalyDescription(val, year);
+
+  // Tint the atmosphere mesh if it exists
+  if(atmosphereMesh) {
+    atmosphereMesh.material.color.set(col.hex);
+    // More opacity when hotter
+    const intensity = Math.max(0, Math.min(1, (val + 0.6) / 2.2));
+    atmosphereMesh.material.opacity = 0.03 + intensity * 0.12;
+  }
+
+  // Redraw sparkline with new marker
+  drawSparkline();
+  drawSparklineMarker(year);
+}
+
+function toggleTempLayer() {
+  tempLayerOpen = !tempLayerOpen;
+  const layer = document.getElementById('temp-layer');
+  const btn = document.getElementById('temp-toggle-btn');
+  if(tempLayerOpen) {
+    layer.classList.remove('hidden');
+    btn.classList.add('active');
+    btn.textContent = '✕ Temperature';
+    if(!tempYears.length) loadTempData();
+    // Resize sparkline after layout
+    setTimeout(()=>{ drawSparkline(); drawSparklineMarker(parseInt(document.getElementById('temp-slider').value)); }, 50);
+  } else {
+    layer.classList.add('hidden');
+    btn.classList.remove('active');
+    btn.textContent = '🌡 Temperature';
+    if(atmosphereMesh) { atmosphereMesh.material.opacity = 0; }
+  }
+}
+window.toggleTempLayer = toggleTempLayer;
+
+// Slider interaction
+document.getElementById('temp-slider').addEventListener('input', function() {
+  const yr = parseInt(this.value);
+  applyYear(yr);
+});
+
+// Sparkline click-to-seek
+document.getElementById('temp-sparkline').addEventListener('click', function(e) {
+  if(!tempYears.length) return;
+  const rect = this.getBoundingClientRect();
+  const frac = (e.clientX - rect.left) / rect.width;
+  const minY = tempYears[0], maxY = tempYears[tempYears.length-1];
+  const yr = Math.round(minY + frac * (maxY - minY));
+  const clamped = Math.max(minY, Math.min(maxY, yr));
+  document.getElementById('temp-slider').value = clamped;
+  applyYear(clamped);
+});
+
+// Expose atmosphere mesh builder — called from initThree after globe is made
+function addAtmosphereTempMesh(globeObj) {
+  const geo = new THREE.SphereGeometry(2.48, 64, 64);
+  const mat = new THREE.MeshBasicMaterial({
+    color: new THREE.Color('#4a7fa8'),
+    transparent:true, opacity:0,
+    depthWrite:false, side:THREE.FrontSide,
+    blending: THREE.AdditiveBlending
+  });
+  atmosphereMesh = new THREE.Mesh(geo, mat);
+  globeObj.add(atmosphereMesh);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════════
+buildControls();
+initThree();
+</script>
+</body>
+</html>
