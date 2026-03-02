@@ -603,11 +603,11 @@ function buildGlobeTexture() {
   const ctx = c.getContext('2d');
 
   // Ocean
-  ctx.fillStyle='#05090e';
+  ctx.fillStyle='#080f1e';
   ctx.fillRect(0,0,W,H);
 
   // Grid lines
-  ctx.strokeStyle='rgba(255,255,255,0.04)';
+  ctx.strokeStyle='rgba(255,255,255,0.09)';
   ctx.lineWidth=0.5;
   for(let lon=-180;lon<=180;lon+=30){
     const x=(lon+180)/360*W;
@@ -636,7 +636,7 @@ async function buildCountryLines() {
     const translate = transform.translate;
 
     const lineGroup = new THREE.Group();
-    const mat = new THREE.LineBasicMaterial({ color:0x1e3050, transparent:true, opacity:0.9, linewidth:1 });
+    const mat = new THREE.LineBasicMaterial({ color:0x3a6090, transparent:true, opacity:0.9, linewidth:1 });
 
     arcs.forEach(arc => {
       if(arc.length < 2) return;
@@ -679,7 +679,7 @@ function buildAtmosphere() {
     }
   `;
   const mat = new THREE.ShaderMaterial({
-    uniforms:{ glowColor:{ value:new THREE.Color(0x0a2040) } },
+    uniforms:{ glowColor:{ value:new THREE.Color(0x1a50c0) } },
     vertexShader:vs, fragmentShader:fs,
     side:THREE.BackSide, blending:THREE.AdditiveBlending,
     transparent:true, depthWrite:false
@@ -823,9 +823,9 @@ async function initThree() {
   const globeTex = buildGlobeTexture();
   const globeMat = new THREE.MeshPhongMaterial({
     map: globeTex,
-    color: 0x0a1828,
-    emissive: 0x040810,
-    shininess: 12,
+    color: 0x0e2040,
+    emissive: 0x081828,
+    shininess: 20,
   });
   globe = new THREE.Mesh(globeGeo, globeMat);
   scene.add(globe);
@@ -834,11 +834,11 @@ async function initThree() {
   addAtmosphereTempMesh(globe);
 
   // Ambient + directional light
-  scene.add(new THREE.AmbientLight(0x1a2535, 2.5));
-  const dLight = new THREE.DirectionalLight(0x5588cc, 1.2);
+  scene.add(new THREE.AmbientLight(0x1a2535, 4.0));
+  const dLight = new THREE.DirectionalLight(0x6699ee, 2.0);
   dLight.position.set(5, 3, 5);
   scene.add(dLight);
-  const dLight2 = new THREE.DirectionalLight(0xff8844, 0.3);
+  const dLight2 = new THREE.DirectionalLight(0xff8844, 0.5);
   dLight2.position.set(-5,-3,-5);
   scene.add(dLight2);
 
