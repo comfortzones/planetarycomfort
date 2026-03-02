@@ -516,6 +516,24 @@ const SITES = [
     quote:'Discomfort is an accommodation of needs through different materials, technologies and realities.',
     theories:['ecology','feminist'],
     refs:[{ a:'Johar 2022', t:'Radicle Civics — Unconstituting Society', u:'#' }]},
+
+  { id:'Garment_b',       name:'Garment Factory (H&C1)',           location:'Dhaka, Bangladesh', type:'extraction_manufacturing',  ll:[23.8,90.4],
+    claim:'???',
+    quote:'???',
+    theories:['??','??'],
+    refs:[{ a:'Barber et al. 2023', t:'After Comfort: A User\'s Guide', u:'https://www.e-flux.com/architecture/after-comfort/568230/editorial/' }]},
+  
+  { id:'Farmers_L',       name:'Farmers Market (H&C2)',           location:'London, England', type:'food',  ll:[51.5,0.12],
+    claim:'???',
+    quote:'???',
+    theories:['??','??'],
+    refs:[{ a:'Barber et al. 2023', t:'After Comfort: A User\'s Guide', u:'https://www.e-flux.com/architecture/after-comfort/568230/editorial/' }]},
+  
+  { id:'Beef_a',       name:'Beef Farms (H&C3)',           location:'North Queensland, Australia', type:'food',  ll:[20.7,144.7],
+    claim:'???',
+    quote:'???',
+    theories:['??','??'],
+    refs:[{ a:'Barber et al. 2023', t:'After Comfort: A User\'s Guide', u:'https://www.e-flux.com/architecture/after-comfort/568230/editorial/' }]},  
 ];
 
 const FLOWS = [
@@ -533,6 +551,11 @@ const FLOWS = [
   { from:'iraq_fob',       to:'sez_india',           type:'capital',    label:'Petro-capital' },
   { from:'oil_westafrica', to:'niger_delta',         type:'fuel',       label:'Extraction network' },
   { from:'redlining',      to:'prisons_texas',       type:'capital',    label:'Carceral geography' },
+
+  { from:'Garment_b',      to:'Farmers_L',           type:'capital',    label:'Manufacturing → capital' },
+  { from:'Beef_a',         to:'Farmers_L',           type:'food',       label:'Agri-food network' },
+  { from:'tomato_border',  to:'Farmers_L',           type:'food',       label:'Agri-food network' },
+  
 ];
 
 // ═══════════════════════════════════════════════════════════════
